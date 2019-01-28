@@ -4,6 +4,8 @@ from icalendar import Calendar, Event
 from datetime import datetime, timedelta, timezone
 from dateutil import rrule
 
+from upcomingevent import UpcomingEvent
+
 now = datetime.now(timezone.utc)
 now_plus_31_days = now + timedelta(days=31)
 
@@ -16,14 +18,17 @@ for component in gcal.walk():
    if component.name == "VEVENT":
       dtstart = component.get('dtstart').dt
       if dtstart > now and dtstart < now_plus_31_days:
-         events.append({'summary':component.get('summary'), 'dtstart':dtstart})
+         event = UpcomingEvent(component.get('summary'), component.get('description', dtstart))
+         events.append(event)
       elif component.get('RRULE'):
          rruleset = rrule.rruleset()
          rruleset.rrule( rrule.rrulestr(component.get('RRULE').to_ical().decode('utf-8'), dtstart=dtstart) )
          recurring_dates = rruleset.between(now, now_plus_31_days)
          if len(recurring_dates) > 0:
-            events.append({'summary':component.get('summary'), 'dtstart':recurring_dates[0]})
+            event = UpcomingEvent(component.get('summary'), component.get('description'), recurring_dates[0])
+            events.append(event)
 
-for event in sorted(events, key=lambda k: k['dtstart']):
-   print(event.get('summary'))
-   print(event.get('dtstart'))
+for event in sorted(events, key=lambda event: event.dtstart):
+   print(event.summary)
+   print(event.description)
+   print(event.dtstart)
