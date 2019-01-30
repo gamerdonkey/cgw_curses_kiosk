@@ -3,7 +3,6 @@ import urllib.request
 from icalendar import Calendar, Event
 from datetime import datetime, timedelta, timezone
 from dateutil import rrule
-
 from upcomingevent import UpcomingEvent
 
 class UpcomingEventRetriever:
@@ -17,7 +16,7 @@ class UpcomingEventRetriever:
       calendar_contents = urllib.request.urlopen(icalendar_url).read()
       calendar = Calendar.from_ical(calendar_contents)
 
-   def get_upcoming_events(self, timedelta_in_days):
+   def get_upcoming_event_list(self, timedelta_in_days):
       now = datetime.now(timezone.utc)
       end_date = now + timedelta(days=timedelta_in_days)
 

@@ -21,11 +21,14 @@ def main(stdscr):
    addstr_hcenter(0, " CGW Kiosk v0.1 ", stdscr, curses.A_BOLD)
    stdscr.refresh()
 
-   mainwindow = stdscr.subwin(curses.LINES - 1, curses.COLS - 2, 1, 1)
+   mainwindow = stdscr.derwin(curses.LINES - 2, curses.COLS - 2, 1, 1)
 
-   headingwindow = mainwindow.subwin(len(Headings.CGW_LOGO) + 1, curses.COLS - 2, 2, 1)
+   headingwindow = mainwindow.derwin(len(Headings.CGW_LOGO) + 1, curses.COLS - 2, 0, 0)
 
    draw_heading(Headings.CGW_LOGO, headingwindow)
+
+   upcomingeventswindow = mainwindow.derwin(10, curses.COLS -2, len(Headings.CGW_LOGO) + 2, 0)
+   upcomingeventswindow.box()
 
    mainwindow.getch()
 
