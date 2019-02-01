@@ -15,6 +15,14 @@ def draw_heading(heading, window):
       addstr_hcenter(y_pos, line, window)
       y_pos += 1
 
+def cutoff_text_to_length(text, length):
+   if len(text) > length:
+      text = text[:length-3]
+      last_space_pos = text.rfind(' ')
+      text = text[:last_space_pos] + '...'
+
+   return text
+
 def draw_upcoming_events(window):
    window.clear()
    (max_y, max_x) = window.getmaxyx()
@@ -25,18 +33,22 @@ def draw_upcoming_events(window):
 
    upcoming_event_retriever = UpcomingEventRetriever('https://calendar.google.com/calendar/ical/columbiagadgetworks%40gmail.com/public/basic.ics')
    for event in upcoming_event_retriever.get_upcoming_event_list(31):
-      tempwin_max_y = 3
+      tempwin_max_y = 4 
       tempwin_max_x = max_x - 4
       tempwin = window.derwin(tempwin_max_y, tempwin_max_x, y_pos, 2)
       tempwin.addstr(event.summary, curses.A_BOLD)
       tempwin.addstr(' - ')
       tempwin.addstr(event.dtstart.strftime("%A, %b %-d @ %H:%M"))
-      tempwin.addstr(1, 0, event.description[:2*tempwin_max_x-1])
+      tempwin.addstr(1, 0, cutoff_text_to_length(event.description, (tempwin_max_y-1) * tempwin_max_x - 1))
 
-      y_pos += 4
+      y_pos += (tempwin_max_y + 1)
+
+      if (tempwin_max_y + y_pos) > max_y:
+         break
 
 def main(stdscr):
    curses.curs_set(0)
+   curses.mousemask(1)
 
    stdscr.clear()
    stdscr.box()
@@ -59,8 +71,17 @@ def main(stdscr):
    contentwindow_height = mainwindow_height - (headingwindow_height + navwindow_height)
    contentwindow = mainwindow.derwin(contentwindow_height, mainwindow_width, headingwindow_height, 0)
 
-   draw_upcoming_events(contentwindow)
+   navwindow.timeout(3 * 60 * 1000)
+   last_event = -1
+   while True:
+      if last_event == -1:
+         draw_upcoming_events(contentwindow)
 
-   mainwindow.getch()
+      mainwindow.refresh()
+
+      event = navwindow.getch()
+      if event == curses.KEY_MOUSE:
+         curses.getmouse()
+      last_event = event
 
 wrapper(main)
