@@ -1,6 +1,7 @@
 import curses
 from curses import wrapper
 from headings import Headings
+import math
 
 from upcomingeventretriever import UpcomingEventRetriever
 
@@ -15,13 +16,24 @@ def draw_heading(heading, window):
       addstr_hcenter(y_pos, line, window)
       y_pos += 1
 
-def cutoff_text_to_length(text, length):
-   if len(text) > length:
-      text = text[:length-3]
-      last_space_pos = text.rfind(' ')
-      text = text[:last_space_pos] + '...'
+def prettify_text(text, line_length, num_lines):
+   end = math.ceil(len(text) / line_length)
+   output_lines = []
+   for i in range(0, end):
+      if i < num_lines:
+         cur_line = text[:line_length]
+         last_space_pos = cur_line.rfind(' ')
+         output_lines.append(cur_line[:last_space_pos] + (' ' * (line_length - last_space_pos)))
+         text = text[last_space_pos:]
+      else:
+         if len(text) >= line_length:
+            text = text[:line_length-3]
+            last_space_pos = text.rfind(' ')
+            text = text[:last_space_pos] + '...'
+         output_lines.append(text)
 
-   return text
+   print(''.join(output_lines))
+   return ''.join(output_lines)
 
 def draw_upcoming_events(window):
    window.clear()
@@ -33,13 +45,13 @@ def draw_upcoming_events(window):
 
    upcoming_event_retriever = UpcomingEventRetriever('https://calendar.google.com/calendar/ical/columbiagadgetworks%40gmail.com/public/basic.ics')
    for event in upcoming_event_retriever.get_upcoming_event_list(31):
-      tempwin_max_y = 4 
+      tempwin_max_y = 4
       tempwin_max_x = max_x - 4
       tempwin = window.derwin(tempwin_max_y, tempwin_max_x, y_pos, 2)
       tempwin.addstr(event.summary, curses.A_BOLD)
       tempwin.addstr(' - ')
       tempwin.addstr(event.dtstart.strftime("%A, %b %-d @ %H:%M"))
-      tempwin.addstr(1, 0, cutoff_text_to_length(event.description, (tempwin_max_y-1) * tempwin_max_x - 1))
+      tempwin.addstr(1, 0, prettify_text(event.description, tempwin_max_x, tempwin_max_y-1))
 
       y_pos += (tempwin_max_y + 1)
 
