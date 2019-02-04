@@ -23,7 +23,7 @@ def wordwrap_text(text, line_length, num_lines):
          if i < (num_lines - 1):
             cur_line = text[:line_length]
             last_space_pos = cur_line.rfind(' ')
-            cur_line  = cur_line[:last_space_pos] + (' ' * (line_length - last_space_pos))
+            cur_line  = cur_line[:last_space_pos] + '\n'
             text = text[last_space_pos + 1:]
          else:
             cur_line = text[:line_length-3]
