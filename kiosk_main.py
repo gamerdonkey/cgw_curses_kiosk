@@ -16,15 +16,18 @@ def draw_heading(heading, window):
       addstr_hcenter(y_pos, line, window)
       y_pos += 1
 
-def prettify_text(text, line_length, num_lines):
-   end = math.ceil(len(text) / line_length)
+def wordwrap_text(text, line_length, num_lines):
    output_lines = []
-   for i in range(0, end):
-      if i < num_lines:
-         cur_line = text[:line_length]
-         last_space_pos = cur_line.rfind(' ')
-         output_lines.append(cur_line[:last_space_pos] + (' ' * (line_length - last_space_pos)))
-         text = text[last_space_pos:]
+   for i in range(0, num_lines):
+      if i < (num_lines - 1):
+         if(len(text) >= line_length):
+            cur_line = text[:line_length]
+            last_space_pos = cur_line.rfind(' ')
+            cur_line  = cur_line[:last_space_pos] + (' ' * (line_length - last_space_pos))
+            text = text[last_space_pos + 1:]
+         else:
+            cur_line = text
+         output_lines.append(cur_line)
       else:
          if len(text) >= line_length:
             text = text[:line_length-3]
@@ -32,7 +35,6 @@ def prettify_text(text, line_length, num_lines):
             text = text[:last_space_pos] + '...'
          output_lines.append(text)
 
-   print(''.join(output_lines))
    return ''.join(output_lines)
 
 def draw_upcoming_events(window):
@@ -51,7 +53,7 @@ def draw_upcoming_events(window):
       tempwin.addstr(event.summary, curses.A_BOLD)
       tempwin.addstr(' - ')
       tempwin.addstr(event.dtstart.strftime("%A, %b %-d @ %H:%M"))
-      tempwin.addstr(1, 0, prettify_text(event.description, tempwin_max_x, tempwin_max_y-1))
+      tempwin.addstr(1, 0, wordwrap_text(event.description, tempwin_max_x, tempwin_max_y-1))
 
       y_pos += (tempwin_max_y + 1)
 
