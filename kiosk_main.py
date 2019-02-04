@@ -19,21 +19,20 @@ def draw_heading(heading, window):
 def wordwrap_text(text, line_length, num_lines):
    output_lines = []
    for i in range(0, num_lines):
-      if i < (num_lines - 1):
-         if(len(text) >= line_length):
+      if len(text) >= line_length:
+         if i < (num_lines - 1):
             cur_line = text[:line_length]
             last_space_pos = cur_line.rfind(' ')
             cur_line  = cur_line[:last_space_pos] + (' ' * (line_length - last_space_pos))
             text = text[last_space_pos + 1:]
          else:
-            cur_line = text
-         output_lines.append(cur_line)
+            cur_line = text[:line_length-3]
+            last_space_pos = cur_line.rfind(' ')
+            cur_line = cur_line[:last_space_pos] + '...'
       else:
-         if len(text) >= line_length:
-            text = text[:line_length-3]
-            last_space_pos = text.rfind(' ')
-            text = text[:last_space_pos] + '...'
-         output_lines.append(text)
+         cur_line = text
+         text = ''
+      output_lines.append(cur_line)
 
    return ''.join(output_lines)
 
