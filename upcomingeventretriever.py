@@ -10,11 +10,19 @@ class UpcomingEventRetriever:
 
    def __init__(self, icalendar_url):
       self.icalendar_url = icalendar_url
+      self.error_count = 0
       self.refresh_calendar()
 
    def refresh_calendar(self):
-      calendar_contents = urllib.request.urlopen(self.icalendar_url).read()
-      self.calendar = Calendar.from_ical(calendar_contents)
+      try:
+         calendar_contents = urllib.request.urlopen(self.icalendar_url).read()
+         self.calendar = Calendar.from_ical(calendar_contents)
+         self.error_count = 0
+      except URLError:
+         if self.error_count < 3:
+            self.error_count += 1
+         else:
+            raise
 
    def get_upcoming_event_list(self, timedelta_in_days):
       now = datetime.now(timezone.utc)
